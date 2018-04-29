@@ -3,6 +3,7 @@ import { Header, Menu, Grid, Segment, Button, Icon, Label, Progress  } from 'sem
 
 import FeedEvents from './FeedEvents'
 import {initialEvents} from './utils/fixtures'
+import ReactPlayer from 'react-player'
 
 import SimpleStorageContract from '../build/contracts/SimpleStorage.json'
 import getWeb3 from './utils/getWeb3'
@@ -18,7 +19,8 @@ class App extends Component {
 
     this.state = {
       active: 'home',
-      storageValue: 0,
+      storageValue: 30,
+      countdownInterval: -1, // id of interval
       web3: null
     }
   }
@@ -80,20 +82,33 @@ class App extends Component {
   };
 
   onPlay = (e) => {
-    // start deducting funds
+    // TODO: start deducting funds
+    this.state.countdownInterval = setInterval(() => {
+      this.setState({storageValue: this.state.storageValue - 3})
+    }, 3);
 
+    setTimeout(() => {
     // after timeout 20s
-      // pause video & deducting funds
+      // pause video
+      // TODO: pause deducting funds
 
-      // AI places bet popup
+      // popup: AI places bet popup
       // prompt user to place bet
 
-      // continue playing video
-      // start deducting funds
+    }, 3)
+
   };
 
+  onBet = (amount) => {
+    // TODO: send bet to contract
+    // continue playing video
+    // TODO: continue deducting funds
+  };
+
+
   onTip = (e) => {
-    // deduct funds
+    // TODO: deduct funds
+
     // add tip event
   };
 

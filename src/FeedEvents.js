@@ -2,7 +2,7 @@
  * Created by leonmak on 28/4/18.
  */
 import React from 'react'
-import { Feed, Icon } from 'semantic-ui-react'
+import { Feed, Icon, Transition } from 'semantic-ui-react'
 
 
 const FeedEvent = ({data}) => (
@@ -49,11 +49,14 @@ const FeedEvent = ({data}) => (
  * @constructor
  */
 const Sidebar = (props) => (
-  <Feed>
+  <Transition.Group
+    as={Feed}
+    duration={200}
+  >
     {props.data.map((eventData, i) =>
       <FeedEvent data={eventData} key={i} />
     )}
-  </Feed>
+  </Transition.Group>
 );
 
 export default Sidebar
