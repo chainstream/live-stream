@@ -1,4 +1,10 @@
 import React, { Component } from 'react'
+import { Header, Menu, Grid, Segment, Button, Icon, Label, Progress  } from 'semantic-ui-react'
+
+import FeedEvents from './FeedEvents'
+import {initialEvents} from './utils/fixtures'
+import ReactPlayer from 'react-player'
+
 import SimpleStorageContract from '../build/contracts/SimpleStorage.json'
 import getWeb3 from './utils/getWeb3'
 
@@ -12,27 +18,24 @@ class App extends Component {
     super(props)
 
     this.state = {
-      storageValue: 0,
+      active: 'home',
+      storageValue: 30,
+      countdownInterval: -1, // id of interval
       web3: null
     }
   }
 
   componentWillMount() {
-    // Get network provider and web3 instance.
-    // See utils/getWeb3 for more info.
-
     getWeb3
     .then(results => {
       this.setState({
         web3: results.web3
       })
-
-      // Instantiate contract once web3 provided.
       this.instantiateContract()
     })
     .catch(() => {
       console.log('Error finding web3.')
-    })
+    }).then(_ => console.log('the'))
   }
 
   instantiateContract() {
@@ -51,42 +54,130 @@ class App extends Component {
     var simpleStorageInstance
 
     // Get accounts.
-    this.state.web3.eth.getAccounts((error, accounts) => {
-      simpleStorage.deployed().then((instance) => {
-        simpleStorageInstance = instance
-
-        // Stores a given value, 5 by default.
-        return simpleStorageInstance.set(5, {from: accounts[0]})
-      }).then((result) => {
-        // Get the value from the contract to prove it worked.
-        return simpleStorageInstance.get.call(accounts[0])
-      }).then((result) => {
-        // Update state with the result.
-        return this.setState({ storageValue: result.c[0] })
-      })
-    })
+    // this.state.web3.eth.getAccounts((error, accounts) => {
+    //   simpleStorage.deployed().then((instance) => {
+    //     simpleStorageInstance = instance
+    //
+    //     // Stores a given value, 5 by default.
+    //     return simpleStorageInstance.set(5, {from: accounts[0]})
+    //   }).then((result) => {
+    //     // Get the value from the contract to prove it worked.
+    //     return simpleStorageInstance.get.call(accounts[0])
+    //   }).then((result) => {
+    //     // Update state with the result.
+    //     return this.setState({ storageValue: result.c[0] })
+    //   })
+    // })
   }
 
-  render() {
-    return (
-      <div className="App">
-        <nav className="navbar pure-menu pure-menu-horizontal">
-            <a href="#" className="pure-menu-heading pure-menu-link">Truffle Box</a>
-        </nav>
+  handleItemClick = (e) => {
+    console.log('click menu')
+  };
 
-        <main className="container">
-          <div className="pure-g">
-            <div className="pure-u-1-1">
-              <h1>Good to Go!</h1>
-              <p>Your Truffle Box is installed and ready.</p>
-              <h2>Smart Contract Example</h2>
-              <p>If your contracts compiled and migrated successfully, below will show a stored value of 5 (by default).</p>
-              <p>Try changing the value stored on <strong>line 59</strong> of App.js.</p>
-              <p>The stored value is: {this.state.storageValue}</p>
+  addFunds = (e) => {
+    this.setState({
+      // TODO: call addFunds from contract
+      storageValue: this.state.storageValue >= 100 ? 0 : this.state.storageValue + 20,
+    })
+  };
+
+  onPlay = (e) => {
+    // TODO: start deducting funds
+    this.state.countdownInterval = setInterval(() => {
+      this.setState({storageValue: this.state.storageValue - 3})
+    }, 3);
+
+    setTimeout(() => {
+    // after timeout 20s
+      // pause video
+      // TODO: pause deducting funds
+
+      // popup: AI places bet popup
+      // prompt user to place bet
+
+    }, 3)
+
+  };
+
+  onBet = (amount) => {
+    // TODO: send bet to contract
+    // continue playing video
+    // TODO: continue deducting funds
+  };
+
+
+  onTip = (e) => {
+    // TODO: deduct funds
+
+    // add tip event
+  };
+
+  onFinishGame = (e) => {
+    // show win / lose popup
+    // deduct if lose bet, add if won bet
+  };
+
+  render() {
+    return (<div>
+      <Menu style={{marginBottom: 30}}>
+        <Menu.Item active={this.state.active === 'home'}
+                   content='ChainStream' name='ChainStream' onClick={this.handleItemClick} />
+        <Menu.Item active={this.state.active === 'messages'}
+                   content='Messages' name='messages' onClick={this.handleItemClick} />
+
+        <Menu.Menu position='right'>
+        </Menu.Menu>
+      </Menu>
+
+      <Grid centered >
+
+        {/* HEADER */}
+        <Grid.Row>
+
+          {/* TITLE */}
+          <Grid.Column width={8}>
+            <Grid.Row>
+              <Header as='h1'>iGG vs EHOME</Header>
+            </Grid.Row>
+            <Grid.Row verticalAlign="middle">
+              <Header as='h4'>Hosted By <a>Blizzard</a> &nbsp;&nbsp;&nbsp;</Header>
+              <Button as='div' size='tiny' labelPosition='right'>
+                <Button size='tiny' color='red'><Icon name='bitcoin' />Tip</Button>
+                <Label as='a' basic color='red' pointing='left'>0.42</Label>
+              </Button>
+            </Grid.Row>
+          </Grid.Column>
+
+          {/* FUNDS */}
+          <Grid.Column width={4}>
+            <div className="stream-funds-container">
+            <Header as='h2'>Stream Funds
+              <Button floated='right' onClick={this.addFunds}>
+                <Icon name="add" /><span>Top up</span>
+              </Button>
+            </Header>
+            <Progress percent={this.state.storageValue} indicating />
             </div>
-          </div>
-        </main>
-      </div>
+          </Grid.Column>
+        </Grid.Row>
+
+        {/* CONTENT */}
+        <Grid.Row>
+
+          {/* VIDEO */}
+          <Grid.Column width={8}>
+            <Segment>Video</Segment>
+          </Grid.Column>
+
+          {/* EVENT STREAM */}
+          <Grid.Column width={4}>
+            {/*<Segment>3</Segment>*/}
+            <FeedEvents data={initialEvents} />
+          </Grid.Column>
+        </Grid.Row>
+
+    </Grid>
+    </div>
     );
   }
 }
