@@ -2,7 +2,7 @@
  * Created by leonmak on 28/4/18.
  */
 import React from 'react'
-import { Icon } from 'semantic-ui-react'
+import { Icon, Label } from 'semantic-ui-react'
 import { getAvatar } from './images'
 
 /**
@@ -40,7 +40,7 @@ export const initialEvents = [
     action: 'has tipped 0.02 bitcoins.',
     date: '1 sec ago',
     likes: 15,
-    images: [<Icon name={'bitcoin'} size="large"/>],
+    images: [<Label as='a' image><Icon color='yellow' name={'bitcoin'} size="large"/>0.02 BTC</Label>],
   }, {
     avatar: getAvatar({"gender":"female"}),
     username: 'Sarah',

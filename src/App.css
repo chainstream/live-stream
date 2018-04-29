@@ -87,8 +87,8 @@ code {
   font-size: 1rem;
   position: absolute;
   animation-delay: 4s;
-  -webkit-animation: move_points 3s ease-out infinite;
-  animation: move_points 3s ease-out infinite;
+  -webkit-animation: move_points 2s ease-out infinite;
+  animation: move_points 2s ease-out infinite;
 }
 
 .bet-bot-container {

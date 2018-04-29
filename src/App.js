@@ -1,9 +1,10 @@
 import React, { Component } from 'react'
-import { Header, Menu, Grid, Segment, Button, Icon, Image, Label, Progress, Modal, Form } from 'semantic-ui-react'
+import { Header, Menu, Grid, Segment, Button, Icon, Image, Label, Progress, Modal, Input, Dropdown } from 'semantic-ui-react'
 
 import FeedEvents from './FeedEvents'
 import {initialEvents} from './utils/fixtures'
 import ReactPlayer from 'react-player'
+import TeamCards from './TeamCard'
 
 import ChainstreamContract from '../build/contracts/Chainstream.json'
 import getWeb3 from './utils/getWeb3'
@@ -18,7 +19,7 @@ class App extends Component {
   constructor(props) {
     super(props)
 
-    this.fundsDeducted = 3;
+    this.fundsDeducted = 2;
     this.state = {
       active: 'home',
       storageValue: 90,
@@ -33,6 +34,8 @@ class App extends Component {
       contract: null,
       accounts: null,
       feedEvents: [],
+      betsHome: 0.03,
+      betsAway: 0.05,
     };
     this.onTip = this.onTip.bind(this)
   }
@@ -100,11 +103,11 @@ class App extends Component {
   };
 
   onPlay = () => {
-    console.log('playing');
-    this.startDeductingFunds();
     if (!!this.state.timeoutId) {
+    console.log('playing');
       return
     }
+    this.startDeductingFunds();
     const timeoutId = setTimeout(() => {
     // after timeout 20s
       this.onPause();
@@ -126,7 +129,7 @@ class App extends Component {
       this.setState({
         storageValue: this.state.storageValue - this.fundsDeducted,
       })
-    }, 1000);
+    }, 2000);
 
     this.setState({
       countdownInterval: intervalId
@@ -155,7 +158,6 @@ class App extends Component {
 
     this.setState({isPlaying: true, aiBetting: false});
     setTimeout(() => {
-      console.log('f')
       const wonBet = Math.random() > 0.5;
       this.setState({ isPlaying: false,  gameEnded: true, wonBet })
     }, 30000)
@@ -178,17 +180,21 @@ class App extends Component {
   render() {
     return (<div>
 
-      <Menu style={{marginBottom: 30}}>
+      <Menu
+        inverted
+        style={{marginBottom: 30}}>
         <Menu.Item active={this.state.active === 'home'}
                    content='ChainStream' name='ChainStream' onClick={this.handleItemClick} />
         <Menu.Item active={this.state.active === 'messages'}
                    content='Messages' name='messages' onClick={this.handleItemClick} />
 
         <Menu.Menu position='right'>
+          <Menu.Item content='Logout' name='messages' onClick={this.handleItemClick} />
+
         </Menu.Menu>
       </Menu>
 
-        <Grid centered >
+      <Grid centered >
 
         {/* HEADER */}
         <Grid.Row>
@@ -196,7 +202,7 @@ class App extends Component {
           {/* TITLE */}
           <Grid.Column width={8}>
             <Grid.Row>
-              <Header as='h1'>EG vs EHOME</Header>
+              <Header as='h1'>Ti6 UB Semifinals 2016 | EHOME vs Evil Geniuses</Header>
             </Grid.Row>
             <Grid.Row verticalAlign="middle">
               <Header as='h4'>Hosted By <a>Blizzard</a> &nbsp;&nbsp;&nbsp;</Header>
@@ -219,35 +225,48 @@ class App extends Component {
                 </Button>
               </Header>
               <Progress percent={this.state.storageValue} indicating />
-            </div>
-          </Grid.Column>
-        </Grid.Row>
+          </div>
+        </Grid.Column>
+      </Grid.Row>
 
-        {/* CONTENT */}
-        <Grid.Row>
+      {/* CONTENT */}
+      <Grid.Row>
 
-          {/* VIDEO */}
-          <Grid.Column width={8}>
-            <Segment>
-              <ReactPlayer url='https://youtu.be/CFyNbVyUS-k?t=1h23m50s'
-                           playing={this.state.isPlaying}
-                           onPlay={this.onPlay}
-                           onPause={this.onPause}
-                           width='100%'
-                           height="500px"
-              />
-            </Segment>
-          </Grid.Column>
+        {/* VIDEO */}
+        <Grid.Column width={8}>
+          <Segment>
+            <ReactPlayer url='https://youtu.be/CFyNbVyUS-k?t=1h23m59s'
+                         playing={this.state.isPlaying}
+                         onPlay={this.onPlay}
+                         onPause={this.onPause}
+                         width='100%'
+                         height="500px"
+            />
+          </Segment>
+        </Grid.Column>
 
-          {/* EVENT STREAM */}
-          <Grid.Column width={4}>
+        {/* EVENT STREAM */}
+        <Grid.Column width={4}>
+          <Segment style={{height: 530, overflowY: 'scroll'}}>
             <FeedEvents data={this.state.feedEvents} />
-          </Grid.Column>
-        </Grid.Row>
+          </Segment>
+        </Grid.Column>
+      </Grid.Row>
+
+      <Grid.Row>
+        <Grid.Column width={8}>
+          <TeamCards />
+        </Grid.Column>
+        <Grid.Column width={4}>
+          <Input fluid placeholder='Comment' />
+
+        </Grid.Column>
+      </Grid.Row>
     </Grid>
 
     {/* BET BOT */}
     <Modal
+      size="small"
       className='bet-bot-container'
       open={this.state.aiBetting}
       onClose={() => this.setState({isPlaying: true})}>
@@ -267,17 +286,19 @@ class App extends Component {
               <Header as='h2'>EHOME<Header.Subheader>3.25 ETH</Header.Subheader></Header>
             </Segment>
           </Segment.Group>
-          <Form>
-            <Form.Group>
-            <Form.Field
-              width="3"
-              label='Amount' control='input' type='number' name='betValue'
-              min={0} max={5}
-              onChange={this.handleEditBetValue}
-            />
-            </Form.Group>
-            <small>Limit: <b>$3500 = 5 ETH</b></small>
-          </Form>
+          <Input
+            type="number"
+            label={<Dropdown defaultValue='ETH' options={[
+              { key: 'ETH', text: 'ETH', value: 'ETH' },
+              { key: 'BTC', text: 'BTC', value: 'BTC' },
+              { key: 'EOS', text: 'EOS', value: 'EOS' },
+            ]} />}
+            min={0} max={5} fluid
+            onChange={this.handleEditBetValue}
+            labelPosition='right'
+            placeholder='Amount'
+          />
+          <div><small>&nbsp;  Limit: <b>$3500 = 5 ETH</b></small></div>
         </Modal.Description>
       </Modal.Content>
       <Modal.Actions>
