@@ -45,8 +45,7 @@ class App extends Component {
     .then(results => {
       this.setState({
         web3: results.web3
-      })
-      this.instantiateContract()
+      }, this.instantiateContract)
     })
     .catch(() => {
       console.log('Error finding web3.')
@@ -75,13 +74,14 @@ class App extends Component {
 
     const chainstream = TruffleContract(ChainstreamContract)
     chainstream.setProvider(this.state.web3.currentProvider)
-
     // Declaring this for later so we can chain functions on SimpleStorage.
 
     // Get accounts.
     this.state.web3.eth.getAccounts((error, accounts) => {
       console.log('accounts', accounts)
       chainstream.deployed().then((instance) => {
+        console.log('contract at', instance.address)
+        console.log(window.web3.currentProvider)
         this.setState({
           chainstreamInstance: instance,
           accounts,
@@ -95,11 +95,13 @@ class App extends Component {
   };
 
   addFunds = (e) => {
-    // TODO: call addFunds from contract
 
-    this.setState({
-      storageValue: this.state.storageValue >= 100 ? 0 : this.state.storageValue + 20,
-    })
+    this.state.chainstreamInstance.sendTip('0xc5fdf4076b8f3a5357c5e395ab970b5b54098fef',
+      {from: this.state.accounts[0], value: 1e16}).then(
+      () => this.setState({
+        storageValue: Math.min(100, this.state.storageValue + 100)
+      })
+    )
   };
 
   onPlay = () => {
@@ -111,7 +113,6 @@ class App extends Component {
     const timeoutId = setTimeout(() => {
     // after timeout 20s
       this.onPause();
-      // TODO: pause deducting funds
 
       // popup: AI places bet popup
       // prompt user to place bet
@@ -152,27 +153,36 @@ class App extends Component {
   };
 
   handleSubmitBet = () => {
-    // TODO: send bet to contract
-    // continue playing video
-    // TODO: continue deducting funds
+    this.setState({isPlaying: true, aiBetting: false, storageValue: this.state.storageValue - 10});
 
-    this.setState({isPlaying: true, aiBetting: false});
+    // TODO: send bet to contract
+    this.state.chainstreamInstance.bet(
+      {from: this.state.accounts[0], value: 1e+15}).then(
+      res => console.log(res)
+    )
+    // continue playing video
+
     setTimeout(() => {
       const wonBet = Math.random() > 0.5;
+      // until bug's fixed
+      if (wonBet) {
+        this.state.chainstreamInstance.decideBet(this.state.accounts[0],
+          {from: this.state.accounts[0]}).then(
+          res => console.log(res)
+        )
+      }
       this.setState({ isPlaying: false,  gameEnded: true, wonBet })
     }, 30000)
   };
 
 
   onTip = (e) => {
-    // TODO: deduct funds
-
     // add tip event
     this.state.chainstreamInstance.streamPrice().then((resp) => {
       console.log(resp);
     })
-    this.state.chainstreamInstance.sendTip(this.state.accounts[1],
-      {from: this.state.accounts[0], value: 1}).then(
+    this.state.chainstreamInstance.sendTip('0xf17f52151ebef6c7334fad080c5704d77216b732',
+      {from: this.state.accounts[0], value: 1e+15}).then(
         res => console.log(res)
     )
   };
@@ -205,7 +215,7 @@ class App extends Component {
               <Header as='h1'>Ti6 UB Semifinals 2016 | EHOME vs Evil Geniuses</Header>
             </Grid.Row>
             <Grid.Row verticalAlign="middle">
-              <Header as='h4'>Hosted By <a>Blizzard</a> &nbsp;&nbsp;&nbsp;</Header>
+              <Header as='h4'>Hosted By <a>Valve</a> &nbsp;&nbsp;&nbsp;</Header>
               <Button as='div' size='tiny' labelPosition='right'>
                 <Button onClick={this.onTip} size='tiny' color='red'><Icon name='bitcoin' />Tip</Button>
                 <Label as='a' basic color='red' pointing='left'>0.42</Label>
@@ -316,9 +326,11 @@ class App extends Component {
       dimmer="blurring"
       closeIcon={true}
       className='bet-bot-container'
-      open={this.state.gameEnded}>
+      open={this.state.gameEnded}
+      onClose={()=> this.setState({gameEnded: false, storageValue: this.state.wonBet ? this.state.storageValue + 50 : this.state.storageValue - 50})}
+    >
 
-      <Modal.Header>{this.state.wonBet ? 'Congratulations! You Won the bet' : 'Sorry! Better Luck next time'}</Modal.Header>
+      <Modal.Header>{this.state.wonBet ? 'Congratulations!' : 'Better Luck Next Time!'}</Modal.Header>
       <Modal.Content image>
         <Image wrapped size='small' src={this.state.wonBet ? '/win.png' : '/lost.png'} />
         <Modal.Description>
@@ -326,13 +338,13 @@ class App extends Component {
           <Segment.Group horizontal>
             <Segment color={this.state.betHomeTeam === this.state.wonBet ? 'green' : 'red'} inverted>
               {this.state.betHomeTeam === this.state.wonBet
-                ? <Header as='h2'>EG<Header.Subheader>WON </Header.Subheader></Header>
+                ? <Header inverted as='h2'>EG<Header.Subheader>WON </Header.Subheader></Header>
                 : <Header inverted as='h2'>EHOME<Header.Subheader>LOST</Header.Subheader></Header>
               }
             </Segment>
             <Segment color={this.state.betHomeTeam !== this.state.wonBet ? 'green' : 'red'} inverted>
               {this.state.betHomeTeam !== this.state.wonBet
-                ? <Header as='h2'>EG<Header.Subheader>WON </Header.Subheader></Header>
+                ? <Header inverted as='h2'>EG<Header.Subheader>WON </Header.Subheader></Header>
                 : <Header inverted as='h2'>EHOME<Header.Subheader>LOST</Header.Subheader></Header>
               }
             </Segment>
@@ -342,7 +354,7 @@ class App extends Component {
       </Modal.Content>
       <Modal.Actions>
         <Button.Group>
-          <Button onClick={()=> this.setState({gameEnded: false})}>Done</Button>
+          <Button onClick={()=> this.setState({gameEnded: false, storageValue: this.state.wonBet ? this.state.storageValue + 50 : this.state.storageValue - 50})}>Done</Button>
         </Button.Group>
       </Modal.Actions>
     </Modal>
