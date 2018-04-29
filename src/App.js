@@ -1,3 +1,4 @@
+import { getAvatar } from './utils/images'
 import React, { Component } from 'react'
 import { Header, Menu, Grid, Segment, Button, Icon, Image, Label, Progress, Modal, Form} from 'semantic-ui-react'
 
@@ -24,6 +25,59 @@ const hardcodedAccounts = ['c87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9e
   , 'aa3680d5d48a8283413f7a108367c7299ca73f553735860a87b08f39395618b7'
   , '0f62d96d6675f32685bbdb8ac13cda7c23436f63efbb9d07700d8669ff12b7c4'
   , '8d5366123cb560bb606379f90a0bfd4769eecc0557f1b362dcae9012b548b1e5']
+
+const nextEvents = [
+  {
+    avatar: getAvatar({"gender":"male"}),
+    username: 'Bob',
+    action: ': Hey guys! Hope this will be a great game!',
+    date: '1 sec ago',
+    likes: 1,
+    images: [<Icon name={'hand peace outline'} size="large"/>],
+  }, {
+    avatar: getAvatar({"gender":"male"}),
+    username: 'PDP',
+    action: 'has joined the stream.',
+    date: '1 sec ago',
+    likes: 20,
+    text: 'The king is in the house..'
+  }, {
+    avatar: getAvatar({"gender":"female"}),
+    username: 'Alice',
+    action: 'has tipped 0.02 bitcoins.',
+    date: '1 sec ago',
+    likes: 15,
+    images: [<Icon name={'bitcoin'} size="large"/>],
+  }, {
+    avatar: getAvatar({"gender":"female"}),
+    username: 'Sarah',
+    action: ': GO EG!!!!',
+    date: '1 sec ago',
+    likes: 23,
+    images: [<Icon name={'fire'} size="large"/>],
+  },{
+    avatar: getAvatar({"gender":"female"}),
+    username: 'Alice',
+    action: ': GO EHOME!!!!!!111',
+    date: '1 sec ago',
+    likes: 15,
+    images: [<Icon name={'fire'} size="large"/>, <Icon name={'fire'} size="large"/>],
+  },{
+    avatar: getAvatar({"gender":"male"}),
+    username: 'John',
+    action: 'has tipped 0.02 viacoins.',
+    date: '1 sec ago',
+    likes: 6,
+    images: [<Icon name={'viacoin'} size="large"/>],
+  }, {
+    avatar: getAvatar({"gender":"male"}),
+    username: 'Steve',
+    action: ': EG IS TRASH!!',
+    date: '1 sec ago',
+    likes: 1,
+    images: [<Icon name={'trash'} size="large"/>],
+  }
+]
 
 class App extends Component {
   constructor(props) {
@@ -56,6 +110,17 @@ class App extends Component {
     })
     .catch(() => {
       console.log('Error finding web3.')
+    })
+  }
+
+  componentDidMount() {
+    var nextTime = 100
+    nextEvents.forEach((event) => {
+      setTimeout(() => {
+        initialEvents.splice(0, 0, event)
+      }, nextTime)
+      nextTime = nextTime + 100
+      console.log(nextTime)
     })
   }
 

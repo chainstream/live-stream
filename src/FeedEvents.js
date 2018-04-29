@@ -4,7 +4,6 @@
 import React from 'react'
 import { Feed, Icon, Transition } from 'semantic-ui-react'
 
-
 const FeedEvent = ({data}) => (
   <Feed.Event>
     <Feed.Label image={data.avatar} />
