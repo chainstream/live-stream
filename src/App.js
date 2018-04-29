@@ -17,6 +17,7 @@ class App extends Component {
   constructor(props) {
     super(props)
 
+    this.fundsDeducted = 1;
     this.state = {
       active: 'home',
       storageValue: 30,
@@ -35,7 +36,7 @@ class App extends Component {
     })
     .catch(() => {
       console.log('Error finding web3.')
-    }).then(_ => console.log('the'))
+    })
   }
 
   instantiateContract() {
@@ -75,28 +76,49 @@ class App extends Component {
   };
 
   addFunds = (e) => {
+    // TODO: call addFunds from contract
     this.setState({
-      // TODO: call addFunds from contract
       storageValue: this.state.storageValue >= 100 ? 0 : this.state.storageValue + 20,
     })
   };
 
   onPlay = (e) => {
-    // TODO: start deducting funds
-    this.state.countdownInterval = setInterval(() => {
-      this.setState({storageValue: this.state.storageValue - 3})
-    }, 3);
+    console.log('playing');
+    this.startDeductingFunds();
+    this.setState({isPlaying: true});
 
-    setTimeout(() => {
-    // after timeout 20s
-      // pause video
-      // TODO: pause deducting funds
+    // setTimeout(() => {
+    // // after timeout 20s
+    //   this.setState({
+    //     isPlaying: false
+    //   })
+    //   // TODO: pause deducting funds
+    //
+    //   // popup: AI places bet popup
+    //   // prompt user to place bet
+    //
+    // }, 20)
 
-      // popup: AI places bet popup
-      // prompt user to place bet
+  };
 
-    }, 3)
+  startDeductingFunds() {
+    const intervalId = setInterval(() => {
+      this.setState({
+        storageValue: this.state.storageValue - this.fundsDeducted,
+      })
+    }, 3000);
 
+    this.setState({
+      countdownInterval: intervalId
+    });
+  }
+
+  onPause = (e) => {
+    console.log('stop')
+    clearInterval(this.state.countdownInterval);
+    this.setState({
+      isPlaying: false
+    })
   };
 
   onBet = (amount) => {
@@ -137,7 +159,7 @@ class App extends Component {
           {/* TITLE */}
           <Grid.Column width={8}>
             <Grid.Row>
-              <Header as='h1'>iGG vs EHOME</Header>
+              <Header as='h1'>EG vs EHOME</Header>
             </Grid.Row>
             <Grid.Row verticalAlign="middle">
               <Header as='h4'>Hosted By <a>Blizzard</a> &nbsp;&nbsp;&nbsp;</Header>
@@ -151,12 +173,15 @@ class App extends Component {
           {/* FUNDS */}
           <Grid.Column width={4}>
             <div className="stream-funds-container">
-            <Header as='h2'>Stream Funds
-              <Button floated='right' onClick={this.addFunds}>
-                <Icon name="add" /><span>Top up</span>
-              </Button>
-            </Header>
-            <Progress percent={this.state.storageValue} indicating />
+              <Header as='h2'>Stream Funds &nbsp;
+                { this.state.isPlaying &&
+                  <span className="countdown-funds">-{this.fundsDeducted}</span>
+                }
+                <Button floated='right' onClick={this.addFunds}>
+                  <Icon name="add" /><span>Top up</span>
+                </Button>
+              </Header>
+              <Progress percent={this.state.storageValue} indicating />
             </div>
           </Grid.Column>
         </Grid.Row>
@@ -166,12 +191,17 @@ class App extends Component {
 
           {/* VIDEO */}
           <Grid.Column width={8}>
-            <Segment>Video</Segment>
+            <Segment>
+              <ReactPlayer url='https://www.youtube.com/watch?v=sOz9a6rFNQA'
+                           playing={this.state.isPlaying}
+                           onPlay={this.onPlay}
+                           onPause={this.onPause}
+              />
+            </Segment>
           </Grid.Column>
 
           {/* EVENT STREAM */}
           <Grid.Column width={4}>
-            {/*<Segment>3</Segment>*/}
             <FeedEvents data={initialEvents} />
           </Grid.Column>
         </Grid.Row>

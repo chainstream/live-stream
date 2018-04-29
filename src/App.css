@@ -72,3 +72,22 @@ code {
   border-radius: 10px;
   padding: 21px 18px 3px;
 }
+
+@-webkit-keyframes move_points {
+  0% { margin-top: 0px; opacity: 1; }
+  25%, 100% { margin-top: -10px; opacity: 0; }
+}
+@keyframes move_points {
+  0% { margin-top: 0px; opacity: 1; }
+  25%, 100% { margin-top: -10px; opacity: 0; }
+}
+
+.countdown-funds {
+  color: #ff4977;
+  font-size: 1rem;
+  position: absolute;
+  animation-delay: 4s;
+  -webkit-animation: move_points 3s ease-out infinite;
+  animation: move_points 3s ease-out infinite;
+}
+
