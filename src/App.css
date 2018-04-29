@@ -91,3 +91,7 @@ code {
   animation: move_points 3s ease-out infinite;
 }
 
+.bet-bot-container {
+  margin: 0 auto !important;
+  margin-top: 25vh !important;
+}

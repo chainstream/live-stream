@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Header, Menu, Grid, Segment, Button, Icon, Label, Progress  } from 'semantic-ui-react'
+import { Header, Menu, Grid, Segment, Button, Icon, Image, Label, Progress, Modal} from 'semantic-ui-react'
 
 import FeedEvents from './FeedEvents'
 import {initialEvents} from './utils/fixtures'
@@ -22,6 +22,7 @@ class App extends Component {
       active: 'home',
       storageValue: 30,
       countdownInterval: -1, // id of interval
+      aiBetting: false,
       web3: null
     }
   }
@@ -82,22 +83,24 @@ class App extends Component {
     })
   };
 
-  onPlay = (e) => {
+  onPlay = () => {
     console.log('playing');
     this.startDeductingFunds();
     this.setState({isPlaying: true});
 
-    // setTimeout(() => {
-    // // after timeout 20s
-    //   this.setState({
-    //     isPlaying: false
-    //   })
-    //   // TODO: pause deducting funds
-    //
-    //   // popup: AI places bet popup
-    //   // prompt user to place bet
-    //
-    // }, 20)
+    setTimeout(() => {
+    // after timeout 20s
+      this.onPause();
+      // TODO: pause deducting funds
+
+      this.setState({
+        aiBetting: true
+      })
+      // popup: AI places bet popup
+
+      // prompt user to place bet
+
+    }, 1000)
 
   };
 
@@ -113,7 +116,7 @@ class App extends Component {
     });
   }
 
-  onPause = (e) => {
+  onPause = () => {
     console.log('stop')
     clearInterval(this.state.countdownInterval);
     this.setState({
@@ -141,6 +144,7 @@ class App extends Component {
 
   render() {
     return (<div>
+
       <Menu style={{marginBottom: 30}}>
         <Menu.Item active={this.state.active === 'home'}
                    content='ChainStream' name='ChainStream' onClick={this.handleItemClick} />
@@ -151,7 +155,7 @@ class App extends Component {
         </Menu.Menu>
       </Menu>
 
-      <Grid centered >
+        <Grid centered >
 
         {/* HEADER */}
         <Grid.Row>
@@ -207,8 +211,37 @@ class App extends Component {
         </Grid.Row>
 
     </Grid>
-    </div>
-    );
+
+    {/* BET BOT */}
+    <Modal
+      className='bet-bot-container'
+      open={this.state.aiBetting}>
+      <Modal.Header>Bot has increased the prize pool!</Modal.Header>
+      <Modal.Content image>
+        <Image wrapped size='small' src='/bet-bot.png' />
+        <Modal.Description>
+          <Header>Do you want to place a bet?</Header>
+          <small>Limit: $40 = 0.0004 ETH</small>
+          <Segment circular style={{height: 100, width: 100}}>
+            <Header as='h2'>
+              30%
+              <Header.Subheader>
+                5 ETH
+              </Header.Subheader>
+            </Header>
+          </Segment>
+        </Modal.Description>
+      </Modal.Content>
+      <Modal.Actions>
+        <Button negative>
+          No
+        </Button>
+        <Button positive icon='checkmark' labelPosition='right' content='Yes' />
+      </Modal.Actions>
+
+    </Modal>
+
+    </div>);
   }
 }
 
