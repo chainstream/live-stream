@@ -229,7 +229,7 @@ class App extends Component {
           {/* VIDEO */}
           <Grid.Column width={8}>
             <Segment>
-              <ReactPlayer url='https://www.youtube.com/watch?v=sOz9a6rFNQA'
+              <ReactPlayer url='https://youtu.be/CFyNbVyUS-k?t=1h23m50s'
                            playing={this.state.isPlaying}
                            onPlay={this.onPlay}
                            onPause={this.onPause}
@@ -303,14 +303,16 @@ class App extends Component {
         <Modal.Description>
           <Header>{`You have ${this.state.wonBet? 'won' : 'lost'} ${this.state.betValue * 2} ETH`}</Header>
           <Segment.Group horizontal>
-            <Segment color={this.state.betHomeTeam ? (this.state.wonBet ? 'green' : 'red') : 'black'} inverted>
-              {this.state.betHomeTeam ? <Header as='h2'>EG<Header.Subheader>WON </Header.Subheader></Header>
+            <Segment color={this.state.betHomeTeam === this.state.wonBet ? 'green' : 'red'} inverted>
+              {this.state.betHomeTeam === this.state.wonBet
+                ? <Header as='h2'>EG<Header.Subheader>WON </Header.Subheader></Header>
                 : <Header inverted as='h2'>EHOME<Header.Subheader>LOST</Header.Subheader></Header>
               }
             </Segment>
-            <Segment color={this.state.betHomeTeam ? (!this.state.wonBet ? 'green' : 'red') : 'black'} inverted>
-              {this.state.betHomeTeam ? <Header inverted as='h2'>EHOME<Header.Subheader>LOST </Header.Subheader></Header>
-                : <Header as='h2'>EG<Header.Subheader>WON </Header.Subheader></Header>
+            <Segment color={this.state.betHomeTeam !== this.state.wonBet ? 'green' : 'red'} inverted>
+              {this.state.betHomeTeam !== this.state.wonBet
+                ? <Header as='h2'>EG<Header.Subheader>WON </Header.Subheader></Header>
+                : <Header inverted as='h2'>EHOME<Header.Subheader>LOST</Header.Subheader></Header>
               }
             </Segment>
           </Segment.Group>
