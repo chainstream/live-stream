@@ -31,8 +31,36 @@ export const initialEvents = [
     avatar: getAvatar({"gender":"female"}),
     username: 'Alice',
     action: 'has tipped 0.02 bitcoins.',
-    date: '3 sec ago',
-    likes: 3,
+    date: '10 sec ago',
+    likes: 15,
     images: [<Icon name={'bitcoin'} size="large"/>],
+  }, {
+    avatar: getAvatar({"gender":"female"}),
+    username: 'Sarah',
+    action: ': GO EG!!!!',
+    date: '9 sec ago',
+    likes: 23,
+    images: [<Icon name={'fire'} size="large"/>],
+  },{
+    avatar: getAvatar({"gender":"female"}),
+    username: 'Alice',
+    action: ': GO EHOME!!!!!!111',
+    date: '5 sec ago',
+    likes: 15,
+    images: [<Icon name={'fire'} size="large"/>, <Icon name={'fire'} size="large"/>],
+  },{
+    avatar: getAvatar({"gender":"male"}),
+    username: 'John',
+    action: 'has tipped 0.02 viacoins.',
+    date: '3 sec ago',
+    likes: 6,
+    images: [<Icon name={'viacoin'} size="large"/>],
+  }, {
+    avatar: getAvatar({"gender":"male"}),
+    username: 'Steve',
+    action: ': EG IS TRASH!!',
+    date: '2 sec ago',
+    likes: 1,
+    images: [<Icon name={'trash'} size="large"/>],
   }
 ];
