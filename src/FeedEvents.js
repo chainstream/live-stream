@@ -4,7 +4,6 @@
 import React from 'react'
 import { Feed, Icon, Transition } from 'semantic-ui-react'
 
-
 const FeedEvent = ({data}) => (
   <Feed.Event>
     <Feed.Label image={data.avatar} />
@@ -48,7 +47,7 @@ const FeedEvent = ({data}) => (
  * @param props
  * @constructor
  */
-const Sidebar = (props) => (
+const FeedEvents = (props) => (
   <Transition.Group
     as={Feed}
     duration={200}
@@ -59,4 +58,4 @@ const Sidebar = (props) => (
   </Transition.Group>
 );
 
-export default Sidebar
+export default FeedEvents

@@ -1,5 +1,6 @@
+import { getAvatar } from './utils/images'
 import React, { Component } from 'react'
-import { Header, Menu, Grid, Segment, Button, Icon, Label, Progress  } from 'semantic-ui-react'
+import { Header, Menu, Grid, Segment, Button, Icon, Image, Label, Progress, Modal, Form } from 'semantic-ui-react'
 
 import FeedEvents from './FeedEvents'
 import {initialEvents} from './utils/fixtures'
@@ -25,18 +26,78 @@ const hardcodedAccounts = ['c87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9e
   , '0f62d96d6675f32685bbdb8ac13cda7c23436f63efbb9d07700d8669ff12b7c4'
   , '8d5366123cb560bb606379f90a0bfd4769eecc0557f1b362dcae9012b548b1e5']
 
+const nextEvents = [
+  {
+    avatar: getAvatar({"gender":"male"}),
+    username: 'Bob',
+    action: ': Hey guys! Hope this will be a great game!',
+    date: '1 sec ago',
+    likes: 1,
+    images: [<Icon name={'hand peace outline'} size="large"/>],
+  }, {
+    avatar: getAvatar({"gender":"male"}),
+    username: 'PDP',
+    action: 'has joined the stream.',
+    date: '1 sec ago',
+    likes: 20,
+    text: 'The king is in the house..'
+  }, {
+    avatar: getAvatar({"gender":"female"}),
+    username: 'Alice',
+    action: 'has tipped 0.02 bitcoins.',
+    date: '1 sec ago',
+    likes: 15,
+    images: [<Icon name={'bitcoin'} size="large"/>],
+  }, {
+    avatar: getAvatar({"gender":"female"}),
+    username: 'Sarah',
+    action: ': GO EG!!!!',
+    date: '1 sec ago',
+    likes: 23,
+    images: [<Icon name={'fire'} size="large"/>],
+  },{
+    avatar: getAvatar({"gender":"female"}),
+    username: 'Alice',
+    action: ': GO EHOME!!!!!!111',
+    date: '1 sec ago',
+    likes: 15,
+    images: [<Icon name={'fire'} size="large"/>, <Icon name={'fire'} size="large"/>],
+  },{
+    avatar: getAvatar({"gender":"male"}),
+    username: 'John',
+    action: 'has tipped 0.02 viacoins.',
+    date: '1 sec ago',
+    likes: 6,
+    images: [<Icon name={'viacoin'} size="large"/>],
+  }, {
+    avatar: getAvatar({"gender":"male"}),
+    username: 'Steve',
+    action: ': EG IS TRASH!!',
+    date: '1 sec ago',
+    likes: 1,
+    images: [<Icon name={'trash'} size="large"/>],
+  }
+]
+
 class App extends Component {
   constructor(props) {
     super(props)
 
+    this.fundsDeducted = 3;
     this.state = {
       active: 'home',
-      storageValue: 30,
-      countdownInterval: -1, // id of interval
+      storageValue: 90,
+      countdownInterval: -1,  // id of interval
+      aiBetting: false,
+      betHomeTeam: null,      // team index null/0/1
+      gameEnded: false,
+      wonBet: false,
+      betValue: 0,
+      timeoutId: null,
       web3: null,
       contract: null,
       accounts: null,
-    }
+    };
     this.onTip = this.onTip.bind(this)
   }
 
@@ -50,7 +111,18 @@ class App extends Component {
     })
     .catch(() => {
       console.log('Error finding web3.')
-    }).then(_ => console.log('the'))
+    })
+  }
+
+  componentDidMount() {
+    var nextTime = 100
+    nextEvents.forEach((event) => {
+      setTimeout(() => {
+        initialEvents.splice(0, 0, event)
+      }, nextTime)
+      nextTime = nextTime + 100
+      console.log(nextTime)
+    })
   }
 
   instantiateContract() {
@@ -83,35 +155,73 @@ class App extends Component {
   };
 
   addFunds = (e) => {
+    // TODO: call addFunds from contract
 
     this.setState({
-      // TODO: call addFunds from contract
       storageValue: this.state.storageValue >= 100 ? 0 : this.state.storageValue + 20,
     })
   };
 
-  onPlay = (e) => {
-    // TODO: start deducting funds
-    this.state.countdownInterval = setInterval(() => {
-      this.setState({storageValue: this.state.storageValue - 3})
-    }, 3);
-
-    setTimeout(() => {
+  onPlay = () => {
+    console.log('playing');
+    this.startDeductingFunds();
+    if (!!this.state.timeoutId) {
+      return
+    }
+    const timeoutId = setTimeout(() => {
     // after timeout 20s
-      // pause video
+      this.onPause();
       // TODO: pause deducting funds
 
       // popup: AI places bet popup
       // prompt user to place bet
+      this.setState({ aiBetting: true });
+    }, 20000);
 
-    }, 3)
-
+    this.setState({
+      isPlaying: true,
+      timeoutId
+    });
   };
 
-  onBet = (amount) => {
+  startDeductingFunds() {
+    const intervalId = setInterval(() => {
+      this.setState({
+        storageValue: this.state.storageValue - this.fundsDeducted,
+      })
+    }, 1000);
+
+    this.setState({
+      countdownInterval: intervalId
+    });
+  }
+
+  onPause = () => {
+    clearInterval(this.state.countdownInterval);
+    this.setState({
+      isPlaying: false
+    })
+  };
+
+  handleEditBetValue = (e) => {
+    this.setState({betValue: e.target.value});
+  };
+
+  handleEditBetTeam = (isHomeTeam) => () => {
+    this.setState({betHomeTeam: isHomeTeam});
+  };
+
+  handleSubmitBet = () => {
     // TODO: send bet to contract
     // continue playing video
     // TODO: continue deducting funds
+
+    this.setState({isPlaying: true, aiBetting: false});
+    setTimeout(() => {
+      console.log('f')
+      const wonBet = Math.random() > 0.5;
+      this.setState({ isPlaying: false,  gameEnded: true, wonBet })
+    }, 30000)
   };
 
 
@@ -129,13 +239,9 @@ class App extends Component {
     )
   };
 
-  onFinishGame = (e) => {
-    // show win / lose popup
-    // deduct if lose bet, add if won bet
-  };
-
   render() {
     return (<div>
+
       <Menu style={{marginBottom: 30}}>
         <Menu.Item active={this.state.active === 'home'}
                    content='ChainStream' name='ChainStream' onClick={this.handleItemClick} />
@@ -146,7 +252,7 @@ class App extends Component {
         </Menu.Menu>
       </Menu>
 
-      <Grid centered >
+        <Grid centered >
 
         {/* HEADER */}
         <Grid.Row>
@@ -154,7 +260,7 @@ class App extends Component {
           {/* TITLE */}
           <Grid.Column width={8}>
             <Grid.Row>
-              <Header as='h1'>iGG vs EHOME</Header>
+              <Header as='h1'>EG vs EHOME</Header>
             </Grid.Row>
             <Grid.Row verticalAlign="middle">
               <Header as='h4'>Hosted By <a>Blizzard</a> &nbsp;&nbsp;&nbsp;</Header>
@@ -168,12 +274,15 @@ class App extends Component {
           {/* FUNDS */}
           <Grid.Column width={4}>
             <div className="stream-funds-container">
-            <Header as='h2'>Stream Funds
-              <Button floated='right' onClick={this.addFunds}>
-                <Icon name="add" /><span>Top up</span>
-              </Button>
-            </Header>
-            <Progress percent={this.state.storageValue} indicating />
+              <Header as='h2'>Stream Funds &nbsp;
+                { this.state.isPlaying &&
+                  <span className="countdown-funds">-{this.fundsDeducted}</span>
+                }
+                <Button floated='right' onClick={this.addFunds}>
+                  <Icon name="add" /><span>Top up</span>
+                </Button>
+              </Header>
+              <Progress percent={this.state.storageValue} indicating />
             </div>
           </Grid.Column>
         </Grid.Row>
@@ -183,19 +292,103 @@ class App extends Component {
 
           {/* VIDEO */}
           <Grid.Column width={8}>
-            <Segment>Video</Segment>
+            <Segment>
+              <ReactPlayer url='https://www.youtube.com/watch?v=sOz9a6rFNQA'
+                           playing={this.state.isPlaying}
+                           onPlay={this.onPlay}
+                           onPause={this.onPause}
+                           width='100%'
+                           height="500px"
+              />
+            </Segment>
           </Grid.Column>
 
           {/* EVENT STREAM */}
           <Grid.Column width={4}>
-            {/*<Segment>3</Segment>*/}
             <FeedEvents data={initialEvents} />
           </Grid.Column>
         </Grid.Row>
-
     </Grid>
-    </div>
-    );
+
+    {/* BET BOT */}
+    <Modal
+      className='bet-bot-container'
+      open={this.state.aiBetting}
+      onClose={() => this.setState({isPlaying: true})}>
+      <Modal.Header>Bot has increased the prize pool!</Modal.Header>
+      <Modal.Content image>
+        <Image wrapped size='small' src='/bet-bot.png' />
+        <Modal.Description>
+          <Segment>Bot has placed a <b>0.4 ETH</b> bet on TEAM <b>EG</b> with <b>66.75%</b> confidence</Segment>
+          <Header>Do you want to place a bet?</Header>
+          <Segment.Group horizontal>
+            <Segment color={this.state.betHomeTeam === null ? 'black' : this.state.betHomeTeam ? 'green' : 'black'}
+                     onClick={this.handleEditBetTeam(true)}>
+              <Header as='h2'>EG<Header.Subheader>2.13<span style={{color: 'green'}}> (+0.4) </span>ETH</Header.Subheader></Header>
+            </Segment>
+            <Segment color={this.state.betHomeTeam === null ? 'black' : !this.state.betHomeTeam ? 'green' : 'black'}
+                     onClick={this.handleEditBetTeam(false)}>
+              <Header as='h2'>EHOME<Header.Subheader>3.25 ETH</Header.Subheader></Header>
+            </Segment>
+          </Segment.Group>
+          <Form>
+            <Form.Group>
+            <Form.Field
+              width="3"
+              label='Amount' control='input' type='number' name='betValue'
+              min={0} max={5}
+              onChange={this.handleEditBetValue}
+            />
+            </Form.Group>
+            <small>Limit: <b>$3500 = 5 ETH</b></small>
+          </Form>
+        </Modal.Description>
+      </Modal.Content>
+      <Modal.Actions>
+        <Button.Group>
+          <Button onClick={() => this.setState({aiBetting: false})}>Skip</Button>
+          <Button.Or />
+          <Button onClick={this.handleSubmitBet} positive>Save Bet</Button>
+        </Button.Group>
+      </Modal.Actions>
+    </Modal>
+
+    {/* WIN/LOSE POPUP */}
+    <Modal
+      size="tiny"
+      dimmer="blurring"
+      closeIcon={true}
+      className='bet-bot-container'
+      open={this.state.gameEnded}>
+
+      <Modal.Header>{this.state.wonBet ? 'Congratulations! You Won the bet' : 'Sorry! Better Luck next time'}</Modal.Header>
+      <Modal.Content image>
+        <Image wrapped size='small' src={this.state.wonBet ? '/win.png' : '/lost.png'} />
+        <Modal.Description>
+          <Header>{`You have ${this.state.wonBet? 'won' : 'lost'} ${this.state.betValue * 2} ETH`}</Header>
+          <Segment.Group horizontal>
+            <Segment color={this.state.betHomeTeam ? (this.state.wonBet ? 'green' : 'red') : 'black'} inverted>
+              {this.state.betHomeTeam ? <Header as='h2'>EG<Header.Subheader>WON </Header.Subheader></Header>
+                : <Header inverted as='h2'>EHOME<Header.Subheader>LOST</Header.Subheader></Header>
+              }
+            </Segment>
+            <Segment color={this.state.betHomeTeam ? (!this.state.wonBet ? 'green' : 'red') : 'black'} inverted>
+              {this.state.betHomeTeam ? <Header inverted as='h2'>EHOME<Header.Subheader>LOST </Header.Subheader></Header>
+                : <Header as='h2'>EG<Header.Subheader>WON </Header.Subheader></Header>
+              }
+            </Segment>
+          </Segment.Group>
+          <Segment>You have <b>{this.state.wonBet ? 'won': 'lost'}</b> the bet!</Segment>
+        </Modal.Description>
+      </Modal.Content>
+      <Modal.Actions>
+        <Button.Group>
+          <Button onClick={()=> this.setState({gameEnded: false})}>Done</Button>
+        </Button.Group>
+      </Modal.Actions>
+    </Modal>
+
+    </div>);
   }
 }
 
