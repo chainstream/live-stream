@@ -86,11 +86,8 @@ class App extends Component {
   };
 
   addFunds = (e) => {
-<<<<<<< HEAD
     // TODO: call addFunds from contract
-=======
 
->>>>>>> c1869816e8a93b2d344eeb7136fdd2525bca678f
     this.setState({
       storageValue: this.state.storageValue >= 100 ? 0 : this.state.storageValue + 20,
     })
