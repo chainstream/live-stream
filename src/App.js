@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Header, Menu, Grid, Segment, Button, Icon, Image, Label, Progress, Modal, Form} from 'semantic-ui-react'
+import { Header, Menu, Grid, Segment, Button, Icon, Image, Label, Progress, Modal, Form, Dropdown} from 'semantic-ui-react'
 
 import FeedEvents from './FeedEvents'
 import {initialEvents} from './utils/fixtures'
@@ -29,13 +29,13 @@ class App extends Component {
   constructor(props) {
     super(props)
 
-    this.fundsDeducted = 1;
+    this.fundsDeducted = 3;
     this.state = {
       active: 'home',
-      storageValue: 30,
+      storageValue: 90,
       countdownInterval: -1,  // id of interval
-      aiBetting: true,
-      betHomeTeam: true,      // team index 0/1
+      aiBetting: false,
+      betHomeTeam: null,      // team index null/0/1
       betValue: 0,
       web3: null,
       contract: null,
@@ -103,14 +103,13 @@ class App extends Component {
       this.onPause();
       // TODO: pause deducting funds
 
+      // popup: AI places bet popup
+      // prompt user to place bet
       this.setState({
         aiBetting: true
       })
-      // popup: AI places bet popup
 
-      // prompt user to place bet
-
-    }, 1000)
+    }, 10000)
 
   };
 
@@ -119,7 +118,7 @@ class App extends Component {
       this.setState({
         storageValue: this.state.storageValue - this.fundsDeducted,
       })
-    }, 3000);
+    }, 1000);
 
     this.setState({
       countdownInterval: intervalId
@@ -134,9 +133,13 @@ class App extends Component {
     })
   };
 
-  handleEditBetValue = (e, { name, value }) => this.setState({ [name]: value });
+  handleEditBetValue = (e) => {
+    this.setState({betValue: e.target.value});
+  };
 
-  handleEditBetTeam = (isHomeTeam) => () => this.setState({betHomeTeam: isHomeTeam});
+  handleEditBetTeam = (isHomeTeam) => () => {
+    this.setState({betHomeTeam: isHomeTeam});
+  };
 
   handleSubmitBet = () => {
     // TODO: send bet to contract
@@ -229,7 +232,6 @@ class App extends Component {
             <FeedEvents data={initialEvents} />
           </Grid.Column>
         </Grid.Row>
-
     </Grid>
 
     {/* BET BOT */}
@@ -243,20 +245,25 @@ class App extends Component {
           <Segment>Bot has placed a <b>0.4 ETH</b> bet on TEAM <b>EG</b> with <b>66.75%</b> confidence</Segment>
           <Header>Do you want to place a bet?</Header>
           <Segment.Group horizontal>
-            <Segment onClick={this.handleEditBetTeam(true)}>
+            <Segment color={this.state.betHomeTeam === null ? 'black' : this.state.betHomeTeam ? 'green' : 'black'}
+                     onClick={this.handleEditBetTeam(true)}>
               <Header as='h2'>EG<Header.Subheader>2.13<span style={{color: 'green'}}> (+0.4) </span>ETH</Header.Subheader></Header>
             </Segment>
-            <Segment onClick={this.handleEditBetTeam(false)}>
+            <Segment color={this.state.betHomeTeam === null ? 'black' : !this.state.betHomeTeam ? 'green' : 'black'}
+                     onClick={this.handleEditBetTeam(false)}>
               <Header as='h2'>EHOME<Header.Subheader>3.25 ETH</Header.Subheader></Header>
             </Segment>
           </Segment.Group>
           <Form onSubmit={this.handleSubmitBet}>
+            <Form.Group>
             <Form.Field
-              label='Quantity' control='input' type='number' name='betValue'
+              width="3"
+              label='Amount' control='input' type='number' name='betValue'
               min={0} max={5}
               onChange={this.handleEditBetValue}
             />
-            <small>Limit: $3500 = 5 ETH</small>
+            </Form.Group>
+            <small>Limit: <b>$3500 = 5 ETH</b></small>
           </Form>
         </Modal.Description>
       </Modal.Content>
