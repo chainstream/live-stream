@@ -34,7 +34,9 @@ class App extends Component {
       active: 'home',
       storageValue: 30,
       countdownInterval: -1,  // id of interval
-      aiBetting: true,
+      aiBetting: false,
+      gameEnded: false,
+      wonBet: false,
       betHomeTeam: true,      // team index 0/1
       betValue: 0,
       web3: null,
@@ -159,6 +161,9 @@ class App extends Component {
 
   onFinishGame = (e) => {
     // show win / lose popup
+    this.setState({gameEnded: true})
+
+
     // deduct if lose bet, add if won bet
   };
 
@@ -265,6 +270,33 @@ class App extends Component {
           <Button>Skip</Button>
           <Button.Or />
           <Button positive>Save Bet</Button>
+        </Button.Group>
+      </Modal.Actions>
+    </Modal>
+
+    {/* WIN/LOSE POPUP */}
+    <Modal
+      className='bet-bot-container'
+      open={this.state.gameEnded}>
+      <Modal.Header>The bet is up!</Modal.Header>
+      <Modal.Content image>
+        <Image wrapped size='small' src='/bet-bot.png' />
+        <Modal.Description>
+          <Header>Who will win the game?</Header>
+          <Segment.Group horizontal>
+            <Segment disabled color={this.state.betHomeTeam ? (this.state.wonBet ? 'green' : 'red') : ''} inverted={this.state.betHomeTeam}>
+              <Header as='h2'>EG<Header.Subheader>2.13<span style={{color: 'green'}}> (+0.4) </span>ETH</Header.Subheader></Header>
+            </Segment>
+            <Segment disabled color={!this.state.betHomeTeam ? (this.state.wonBet ? 'green' : 'red') : ''} inverted={!this.state.betHomeTeam}>
+              <Header as='h2'>EHOME<Header.Subheader>3.25 ETH</Header.Subheader></Header>
+            </Segment>
+          </Segment.Group>
+          <Segment>You have <b>{this.state.wonBet ? 'won': 'lost'}</b> the bet!</Segment>
+        </Modal.Description>
+      </Modal.Content>
+      <Modal.Actions>
+        <Button.Group>
+          <Button positive>Done</Button>
         </Button.Group>
       </Modal.Actions>
     </Modal>
