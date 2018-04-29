@@ -39,6 +39,7 @@ class App extends Component {
       gameEnded: false,
       wonBet: false,
       betValue: 0,
+      timeoutId: null,
       web3: null,
       contract: null,
       accounts: null,
@@ -98,21 +99,23 @@ class App extends Component {
   onPlay = () => {
     console.log('playing');
     this.startDeductingFunds();
-    this.setState({isPlaying: true});
-
-    setTimeout(() => {
+    if (!!this.state.timeoutId) {
+      return
+    }
+    const timeoutId = setTimeout(() => {
     // after timeout 20s
       this.onPause();
       // TODO: pause deducting funds
 
       // popup: AI places bet popup
       // prompt user to place bet
-      this.setState({
-        aiBetting: true
-      })
+      this.setState({ aiBetting: true });
+    }, 20000);
 
-    }, 10000)
-
+    this.setState({
+      isPlaying: true,
+      timeoutId
+    });
   };
 
   startDeductingFunds() {
@@ -128,7 +131,6 @@ class App extends Component {
   }
 
   onPause = () => {
-    console.log('stop')
     clearInterval(this.state.countdownInterval);
     this.setState({
       isPlaying: false
@@ -147,6 +149,11 @@ class App extends Component {
     // TODO: send bet to contract
     // continue playing video
     // TODO: continue deducting funds
+
+    this.setState({isPlaying: true});
+    const timeoutId = setTimeout(() => {
+      this.setState({ isPlaying: false,  gameEnded: true, timeoutId })
+    }, 30000)
   };
 
 
@@ -165,8 +172,6 @@ class App extends Component {
   onFinishGame = (e) => {
     // show win / lose popup
     this.setState({gameEnded: true})
-
-
     // deduct if lose bet, add if won bet
   };
 
@@ -228,6 +233,8 @@ class App extends Component {
                            playing={this.state.isPlaying}
                            onPlay={this.onPlay}
                            onPause={this.onPause}
+                           width='100%'
+                           height="500px"
               />
             </Segment>
           </Grid.Column>
@@ -242,7 +249,8 @@ class App extends Component {
     {/* BET BOT */}
     <Modal
       className='bet-bot-container'
-      open={this.state.aiBetting}>
+      open={this.state.aiBetting}
+      onClose={() => this.setState({isPlaying: true})}>
       <Modal.Header>Bot has increased the prize pool!</Modal.Header>
       <Modal.Content image>
         <Image wrapped size='small' src='/bet-bot.png' />
@@ -274,9 +282,9 @@ class App extends Component {
       </Modal.Content>
       <Modal.Actions>
         <Button.Group>
-          <Button>Skip</Button>
+          <Button onClick={() => this.setState({aiBetting: false})}>Skip</Button>
           <Button.Or />
-          <Button positive>Save Bet</Button>
+          <Button onClick={() => this.setState({aiBetting: false})}positive>Save Bet</Button>
         </Button.Group>
       </Modal.Actions>
     </Modal>
@@ -291,10 +299,10 @@ class App extends Component {
         <Modal.Description>
           <Header>Who will win the game?</Header>
           <Segment.Group horizontal>
-            <Segment disabled color={this.state.betHomeTeam ? (this.state.wonBet ? 'green' : 'red') : ''} inverted={this.state.betHomeTeam}>
+            <Segment disabled color={this.state.betHomeTeam ? (this.state.wonBet ? 'green' : 'red') : 'black'} inverted={this.state.betHomeTeam}>
               <Header as='h2'>EG<Header.Subheader>2.13<span style={{color: 'green'}}> (+0.4) </span>ETH</Header.Subheader></Header>
             </Segment>
-            <Segment disabled color={!this.state.betHomeTeam ? (this.state.wonBet ? 'green' : 'red') : ''} inverted={!this.state.betHomeTeam}>
+            <Segment disabled color={!this.state.betHomeTeam ? (this.state.wonBet ? 'green' : 'red') : 'black'} inverted={!this.state.betHomeTeam}>
               <Header as='h2'>EHOME<Header.Subheader>3.25 ETH</Header.Subheader></Header>
             </Segment>
           </Segment.Group>
