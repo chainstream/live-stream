@@ -1,4 +1,3 @@
-import { getAvatar } from './utils/images'
 import React, { Component } from 'react'
 import { Header, Menu, Grid, Segment, Button, Icon, Image, Label, Progress, Modal, Form } from 'semantic-ui-react'
 
@@ -14,70 +13,6 @@ import './css/oswald.css'
 import './css/open-sans.css'
 import './css/pure-min.css'
 import './App.css'
-
-const hardcodedAccounts = ['c87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3'
-  ,'ae6ae8e5ccbfb04590405997ee2d52d2b330726137b875053c36d94e974d162f'
-  , '0dbbe8e4ae425a6d2687f1a7e3ba17bc98c673636790f1b8ad91193c05875ef1'
-  , 'c88b703fb08cbea894b6aeff5a544fb92e78a18e19814cd85da83b71f772aa6c'
-  , '388c684f0ba1ef5017716adb5d21a053ea8e90277d0868337519f97bede61418'
-  , '659cbb0e2411a44db63778987b1e22153c086a95eb6b18bdf89de078917abc63'
-  , '82d052c865f5763aad42add438569276c00d3d88a2d062d36b2bae914d58b8c8'
-  , 'aa3680d5d48a8283413f7a108367c7299ca73f553735860a87b08f39395618b7'
-  , '0f62d96d6675f32685bbdb8ac13cda7c23436f63efbb9d07700d8669ff12b7c4'
-  , '8d5366123cb560bb606379f90a0bfd4769eecc0557f1b362dcae9012b548b1e5']
-
-const nextEvents = [
-  {
-    avatar: getAvatar({"gender":"male"}),
-    username: 'Bob',
-    action: ': Hey guys! Hope this will be a great game!',
-    date: '1 sec ago',
-    likes: 1,
-    images: [<Icon name={'hand peace outline'} size="large"/>],
-  }, {
-    avatar: getAvatar({"gender":"male"}),
-    username: 'PDP',
-    action: 'has joined the stream.',
-    date: '1 sec ago',
-    likes: 20,
-    text: 'The king is in the house..'
-  }, {
-    avatar: getAvatar({"gender":"female"}),
-    username: 'Alice',
-    action: 'has tipped 0.02 bitcoins.',
-    date: '1 sec ago',
-    likes: 15,
-    images: [<Icon name={'bitcoin'} size="large"/>],
-  }, {
-    avatar: getAvatar({"gender":"female"}),
-    username: 'Sarah',
-    action: ': GO EG!!!!',
-    date: '1 sec ago',
-    likes: 23,
-    images: [<Icon name={'fire'} size="large"/>],
-  },{
-    avatar: getAvatar({"gender":"female"}),
-    username: 'Alice',
-    action: ': GO EHOME!!!!!!111',
-    date: '1 sec ago',
-    likes: 15,
-    images: [<Icon name={'fire'} size="large"/>, <Icon name={'fire'} size="large"/>],
-  },{
-    avatar: getAvatar({"gender":"male"}),
-    username: 'John',
-    action: 'has tipped 0.02 viacoins.',
-    date: '1 sec ago',
-    likes: 6,
-    images: [<Icon name={'viacoin'} size="large"/>],
-  }, {
-    avatar: getAvatar({"gender":"male"}),
-    username: 'Steve',
-    action: ': EG IS TRASH!!',
-    date: '1 sec ago',
-    likes: 1,
-    images: [<Icon name={'trash'} size="large"/>],
-  }
-]
 
 class App extends Component {
   constructor(props) {
@@ -97,6 +32,7 @@ class App extends Component {
       web3: null,
       contract: null,
       accounts: null,
+      feedEvents: [],
     };
     this.onTip = this.onTip.bind(this)
   }
@@ -114,14 +50,15 @@ class App extends Component {
     })
   }
 
+  addFeedEvent = (event, timeLag, nextTime=3000) => {
+    setTimeout(() => {
+      this.setState({ feedEvents: [event, ...this.state.feedEvents] })
+    }, nextTime * timeLag * Math.random() * 3)
+  };
+
   componentDidMount() {
-    var nextTime = 100
-    nextEvents.forEach((event) => {
-      setTimeout(() => {
-        initialEvents.splice(0, 0, event)
-      }, nextTime)
-      nextTime = nextTime + 100
-      console.log(nextTime)
+    initialEvents.forEach((event, i) => {
+      this.addFeedEvent(event, i);
     })
   }
 
@@ -228,7 +165,6 @@ class App extends Component {
   onTip = (e) => {
     // TODO: deduct funds
 
-    console.log()
     // add tip event
     this.state.chainstreamInstance.streamPrice().then((resp) => {
       console.log(resp);
@@ -305,7 +241,7 @@ class App extends Component {
 
           {/* EVENT STREAM */}
           <Grid.Column width={4}>
-            <FeedEvents data={initialEvents} />
+            <FeedEvents data={this.state.feedEvents} />
           </Grid.Column>
         </Grid.Row>
     </Grid>
