@@ -37,7 +37,7 @@ class App extends Component {
       aiBetting: true,
       betHomeTeam: true,      // team index 0/1
       betValue: 0,
-      web3: null
+      web3: null,
       contract: null,
       accounts: null,
     }
