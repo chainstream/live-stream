@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Header, Menu, Grid, Segment, Button, Icon, Image, Label, Progress, Modal, Form, Dropdown} from 'semantic-ui-react'
+import { Header, Menu, Grid, Segment, Button, Icon, Image, Label, Progress, Modal, Form } from 'semantic-ui-react'
 
 import FeedEvents from './FeedEvents'
 import {initialEvents} from './utils/fixtures'
@@ -110,7 +110,7 @@ class App extends Component {
       // popup: AI places bet popup
       // prompt user to place bet
       this.setState({ aiBetting: true });
-    }, 20000);
+    }, 5000);
 
     this.setState({
       isPlaying: true,
@@ -150,10 +150,12 @@ class App extends Component {
     // continue playing video
     // TODO: continue deducting funds
 
-    this.setState({isPlaying: true});
-    const timeoutId = setTimeout(() => {
-      this.setState({ isPlaying: false,  gameEnded: true, timeoutId })
-    }, 30000)
+    this.setState({isPlaying: true, aiBetting: false});
+    setTimeout(() => {
+      console.log('f')
+      const wonBet = Math.random() > 0.5;
+      this.setState({ isPlaying: false,  gameEnded: true, wonBet })
+    }, 10000)
   };
 
 
@@ -167,12 +169,6 @@ class App extends Component {
     })
     this.state.chainstreamInstance.sendTip(this.state.accounts[2],
       {value: 1})
-  };
-
-  onFinishGame = (e) => {
-    // show win / lose popup
-    this.setState({gameEnded: true})
-    // deduct if lose bet, add if won bet
   };
 
   render() {
@@ -267,7 +263,7 @@ class App extends Component {
               <Header as='h2'>EHOME<Header.Subheader>3.25 ETH</Header.Subheader></Header>
             </Segment>
           </Segment.Group>
-          <Form onSubmit={this.handleSubmitBet}>
+          <Form>
             <Form.Group>
             <Form.Field
               width="3"
@@ -284,26 +280,34 @@ class App extends Component {
         <Button.Group>
           <Button onClick={() => this.setState({aiBetting: false})}>Skip</Button>
           <Button.Or />
-          <Button onClick={() => this.setState({aiBetting: false})}positive>Save Bet</Button>
+          <Button onClick={this.handleSubmitBet} positive>Save Bet</Button>
         </Button.Group>
       </Modal.Actions>
     </Modal>
 
     {/* WIN/LOSE POPUP */}
     <Modal
+      size="tiny"
+      dimmer="blurring"
+      closeIcon={true}
       className='bet-bot-container'
       open={this.state.gameEnded}>
-      <Modal.Header>The bet is up!</Modal.Header>
+
+      <Modal.Header>{this.state.wonBet ? 'Congratulations! You Won the bet' : 'Sorry! Better Luck next time'}</Modal.Header>
       <Modal.Content image>
-        <Image wrapped size='small' src='/bet-bot.png' />
+        <Image wrapped size='small' src={this.state.wonBet ? '/win.png' : '/lost.png'} />
         <Modal.Description>
-          <Header>Who will win the game?</Header>
+          <Header>{`You have ${this.state.wonBet? 'won' : 'lost'} ${this.state.betValue * 2} ETH`}</Header>
           <Segment.Group horizontal>
-            <Segment disabled color={this.state.betHomeTeam ? (this.state.wonBet ? 'green' : 'red') : 'black'} inverted={this.state.betHomeTeam}>
-              <Header as='h2'>EG<Header.Subheader>2.13<span style={{color: 'green'}}> (+0.4) </span>ETH</Header.Subheader></Header>
+            <Segment color={this.state.betHomeTeam ? (this.state.wonBet ? 'green' : 'red') : 'black'} inverted>
+              {this.state.betHomeTeam ? <Header as='h2'>EG<Header.Subheader>WON </Header.Subheader></Header>
+                : <Header inverted as='h2'>EHOME<Header.Subheader>LOST</Header.Subheader></Header>
+              }
             </Segment>
-            <Segment disabled color={!this.state.betHomeTeam ? (this.state.wonBet ? 'green' : 'red') : 'black'} inverted={!this.state.betHomeTeam}>
-              <Header as='h2'>EHOME<Header.Subheader>3.25 ETH</Header.Subheader></Header>
+            <Segment color={this.state.betHomeTeam ? (!this.state.wonBet ? 'green' : 'red') : 'black'} inverted>
+              {this.state.betHomeTeam ? <Header inverted as='h2'>EHOME<Header.Subheader>LOST </Header.Subheader></Header>
+                : <Header as='h2'>EG<Header.Subheader>WON </Header.Subheader></Header>
+              }
             </Segment>
           </Segment.Group>
           <Segment>You have <b>{this.state.wonBet ? 'won': 'lost'}</b> the bet!</Segment>
@@ -311,7 +315,7 @@ class App extends Component {
       </Modal.Content>
       <Modal.Actions>
         <Button.Group>
-          <Button positive>Done</Button>
+          <Button onClick={()=> this.setState({gameEnded: false})}>Done</Button>
         </Button.Group>
       </Modal.Actions>
     </Modal>
