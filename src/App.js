@@ -110,7 +110,7 @@ class App extends Component {
       // popup: AI places bet popup
       // prompt user to place bet
       this.setState({ aiBetting: true });
-    }, 5000);
+    }, 20000);
 
     this.setState({
       isPlaying: true,
@@ -155,7 +155,7 @@ class App extends Component {
       console.log('f')
       const wonBet = Math.random() > 0.5;
       this.setState({ isPlaying: false,  gameEnded: true, wonBet })
-    }, 10000)
+    }, 30000)
   };
 
 
