@@ -1,5 +1,18 @@
-import React, { Component } from 'react'
-import { Header, Menu, Grid, Segment, Button, Icon, Image, Label, Progress, Modal, Input, Dropdown } from 'semantic-ui-react'
+import React, {Component} from 'react'
+import {
+  Button,
+  Dropdown,
+  Grid,
+  Header,
+  Icon,
+  Image,
+  Input,
+  Label,
+  Menu,
+  Modal,
+  Progress,
+  Segment
+} from 'semantic-ui-react'
 
 import FeedEvents from './FeedEvents'
 import {initialEvents} from './utils/fixtures'
@@ -14,12 +27,13 @@ import './css/oswald.css'
 import './css/open-sans.css'
 import './css/pure-min.css'
 import './App.css'
+import {getAvatar} from "./utils/images";
 
 class App extends Component {
   constructor(props) {
     super(props)
 
-    this.fundsDeducted = 2;
+    this.fundsDeducted = 1;
     this.state = {
       active: 'home',
       storageValue: 90,
@@ -117,7 +131,7 @@ class App extends Component {
       // popup: AI places bet popup
       // prompt user to place bet
       this.setState({ aiBetting: true });
-    }, 20000);
+    }, 60000);
 
     this.setState({
       isPlaying: true,
@@ -183,7 +197,17 @@ class App extends Component {
     })
     this.state.chainstreamInstance.sendTip('0xf17f52151ebef6c7334fad080c5704d77216b732',
       {from: this.state.accounts[0], value: 1e+15}).then(
-        res => console.log(res)
+        res => {
+          this.setState({feedEvents: [{
+              avatar: getAvatar({"gender":"male"}),
+              username: 'You',
+              action: 'have tipped 0.0002 bitcoins.',
+              date: '1 sec ago',
+              likes: 1,
+              images: [<Label as='a' image><Icon color='yellow' name={'bitcoin'} size="large"/>0.0002 BTC</Label>],
+            }, ...this.state.feedEvents]})
+          console.log(res)
+        }
     )
   };
 
@@ -245,7 +269,7 @@ class App extends Component {
         {/* VIDEO */}
         <Grid.Column width={8}>
           <Segment>
-            <ReactPlayer url='https://youtu.be/CFyNbVyUS-k?t=1h23m59s'
+            <ReactPlayer url='https://youtu.be/CFyNbVyUS-k?t=1h23m20s'
                          playing={this.state.isPlaying}
                          onPlay={this.onPlay}
                          onPause={this.onPause}
@@ -257,7 +281,10 @@ class App extends Component {
 
         {/* EVENT STREAM */}
         <Grid.Column width={4}>
-          <Segment style={{height: 530, overflowY: 'scroll'}}>
+          {this.state.betValue > 0
+            ? <Segment>{this.state.betValue} ETH bet on {this.state.betHomeTeam ? 'EG' : 'EHOME'}</Segment>
+            : <Segment>You have not bet on any team</Segment>}
+          <Segment style={{height: 510, overflowY: 'scroll'}}>
             <FeedEvents data={this.state.feedEvents} />
           </Segment>
         </Grid.Column>
