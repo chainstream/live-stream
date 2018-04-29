@@ -41,12 +41,12 @@ contract Chainstream {
 		emit Tip(recipient, msg.value);
 	}
 
-	function bet(address) public payable {
-		bets[address] = msg.value;
+	function bet() public payable {
+		bets[msg.sender] = msg.value;
 	}
 
 	function decideBet(address winner) public onlyOwner {
-		winner.transfer(bets[address]);
-		bets[address] = 0;
+		winner.transfer(bets[winner]);
+		bets[winner] = 0;
 	}
 }

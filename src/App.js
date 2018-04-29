@@ -83,7 +83,7 @@ class App extends Component {
   constructor(props) {
     super(props)
 
-    this.fundsDeducted = 3;
+    this.fundsDeducted = 1.0;
     this.state = {
       active: 'home',
       storageValue: 90,
@@ -106,8 +106,7 @@ class App extends Component {
     .then(results => {
       this.setState({
         web3: results.web3
-      })
-      this.instantiateContract()
+      }, this.instantiateContract)
     })
     .catch(() => {
       console.log('Error finding web3.')
@@ -120,7 +119,7 @@ class App extends Component {
       setTimeout(() => {
         initialEvents.splice(0, 0, event)
       }, nextTime)
-      nextTime = nextTime + 100
+      nextTime = nextTime + 2000
       console.log(nextTime)
     })
   }
@@ -135,13 +134,14 @@ class App extends Component {
 
     const chainstream = TruffleContract(ChainstreamContract)
     chainstream.setProvider(this.state.web3.currentProvider)
-
     // Declaring this for later so we can chain functions on SimpleStorage.
 
     // Get accounts.
     this.state.web3.eth.getAccounts((error, accounts) => {
       console.log('accounts', accounts)
       chainstream.deployed().then((instance) => {
+        console.log('contract at', instance.address)
+        console.log(window.web3.currentProvider)
         this.setState({
           chainstreamInstance: instance,
           accounts,
@@ -155,11 +155,13 @@ class App extends Component {
   };
 
   addFunds = (e) => {
-    // TODO: call addFunds from contract
 
-    this.setState({
-      storageValue: this.state.storageValue >= 100 ? 0 : this.state.storageValue + 20,
-    })
+    this.state.chainstreamInstance.sendTip('0xc5fdf4076b8f3a5357c5e395ab970b5b54098fef',
+      {from: this.state.accounts[0], value: 1e16}).then(
+      () => this.setState({
+        storageValue: Math.min(100, this.state.storageValue + 100)
+      })
+    )
   };
 
   onPlay = () => {
@@ -171,7 +173,6 @@ class App extends Component {
     const timeoutId = setTimeout(() => {
     // after timeout 20s
       this.onPause();
-      // TODO: pause deducting funds
 
       // popup: AI places bet popup
       // prompt user to place bet
@@ -213,28 +214,35 @@ class App extends Component {
 
   handleSubmitBet = () => {
     // TODO: send bet to contract
+    this.state.chainstreamInstance.bet(
+      {from: this.state.accounts[0], value: 1e+15}).then(
+      res => console.log(res)
+    )
     // continue playing video
-    // TODO: continue deducting funds
 
     this.setState({isPlaying: true, aiBetting: false});
     setTimeout(() => {
       console.log('f')
-      const wonBet = Math.random() > 0.5;
+      // until bug's fixed
+      const wonBet = Math.random() > 1;
+      if (wonBet) {
+        this.state.chainstreamInstance.decideBet(this.state.accounts[0],
+          {from: this.state.accounts[0]}).then(
+          res => console.log(res)
+        )
+      }
       this.setState({ isPlaying: false,  gameEnded: true, wonBet })
     }, 30000)
   };
 
 
   onTip = (e) => {
-    // TODO: deduct funds
-
-    console.log()
     // add tip event
     this.state.chainstreamInstance.streamPrice().then((resp) => {
       console.log(resp);
     })
-    this.state.chainstreamInstance.sendTip(this.state.accounts[1],
-      {from: this.state.accounts[0], value: 1}).then(
+    this.state.chainstreamInstance.sendTip('0xf17f52151ebef6c7334fad080c5704d77216b732',
+      {from: this.state.accounts[0], value: 1e+15}).then(
         res => console.log(res)
     )
   };
