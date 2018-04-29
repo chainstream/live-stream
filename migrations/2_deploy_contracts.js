@@ -1,5 +1,3 @@
-var SimpleStorage = artifacts.require("./SimpleStorage.sol");
+var Chainstream = artifacts.require("./Chainstream.sol");
 
-module.exports = function(deployer) {
-  deployer.deploy(SimpleStorage);
-};
+module.exports = (deployer) => deployer.deploy(Chainstream);
