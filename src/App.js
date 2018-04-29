@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Header, Menu, Grid, Segment, Button, Icon, Image, Label, Progress, Modal} from 'semantic-ui-react'
+import { Header, Menu, Grid, Segment, Button, Icon, Image, Label, Progress, Modal, Form} from 'semantic-ui-react'
 
 import FeedEvents from './FeedEvents'
 import {initialEvents} from './utils/fixtures'
@@ -21,8 +21,10 @@ class App extends Component {
     this.state = {
       active: 'home',
       storageValue: 30,
-      countdownInterval: -1, // id of interval
-      aiBetting: false,
+      countdownInterval: -1,  // id of interval
+      aiBetting: true,
+      betHomeTeam: true,      // team index 0/1
+      betValue: 0,
       web3: null
     }
   }
@@ -124,7 +126,11 @@ class App extends Component {
     })
   };
 
-  onBet = (amount) => {
+  handleEditBetValue = (e, { name, value }) => this.setState({ [name]: value });
+
+  handleEditBetTeam = (isHomeTeam) => () => this.setState({betHomeTeam: isHomeTeam});
+
+  handleSubmitBet = () => {
     // TODO: send bet to contract
     // continue playing video
     // TODO: continue deducting funds
@@ -220,25 +226,33 @@ class App extends Component {
       <Modal.Content image>
         <Image wrapped size='small' src='/bet-bot.png' />
         <Modal.Description>
+          <Segment>Bot has placed a <b>0.4 ETH</b> bet on TEAM <b>EG</b> with <b>66.75%</b> confidence</Segment>
           <Header>Do you want to place a bet?</Header>
-          <small>Limit: $40 = 0.0004 ETH</small>
-          <Segment circular style={{height: 100, width: 100}}>
-            <Header as='h2'>
-              30%
-              <Header.Subheader>
-                5 ETH
-              </Header.Subheader>
-            </Header>
-          </Segment>
+          <Segment.Group horizontal>
+            <Segment onClick={this.handleEditBetTeam(true)}>
+              <Header as='h2'>EG<Header.Subheader>2.13<span style={{color: 'green'}}> (+0.4) </span>ETH</Header.Subheader></Header>
+            </Segment>
+            <Segment onClick={this.handleEditBetTeam(false)}>
+              <Header as='h2'>EHOME<Header.Subheader>3.25 ETH</Header.Subheader></Header>
+            </Segment>
+          </Segment.Group>
+          <Form onSubmit={this.handleSubmitBet}>
+            <Form.Field
+              label='Quantity' control='input' type='number' name='betValue'
+              min={0} max={5}
+              onChange={this.handleEditBetValue}
+            />
+            <small>Limit: $3500 = 5 ETH</small>
+          </Form>
         </Modal.Description>
       </Modal.Content>
       <Modal.Actions>
-        <Button negative>
-          No
-        </Button>
-        <Button positive icon='checkmark' labelPosition='right' content='Yes' />
+        <Button.Group>
+          <Button>Skip</Button>
+          <Button.Or />
+          <Button positive>Save Bet</Button>
+        </Button.Group>
       </Modal.Actions>
-
     </Modal>
 
     </div>);
