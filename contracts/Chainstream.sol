@@ -4,10 +4,11 @@ contract Chainstream {
 	uint public streamPrice = 1 ether;
 
 	address admin;
+	mapping(address => uint) public bets;
 
 	event StopStream();
 	event ContinueStream();
-	event Tip(address Streamer);
+	event Tip(address Streamer, uint value);
 
 	function Chainstream() public {
 		admin = msg.sender;
@@ -37,6 +38,15 @@ contract Chainstream {
 
 	function sendTip(address recipient) public payable {
 		recipient.transfer(msg.value);
-		emit Tip(recipient);
+		emit Tip(recipient, msg.value);
+	}
+
+	function bet(address) public payable {
+		bets[address] = msg.value;
+	}
+
+	function decideBet(address winner) public onlyOwner {
+		winner.transfer(bets[address]);
+		bets[address] = 0;
 	}
 }

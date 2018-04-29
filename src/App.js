@@ -68,10 +68,11 @@ class App extends Component {
 
     // Get accounts.
     this.state.web3.eth.getAccounts((error, accounts) => {
+      console.log('accounts', accounts)
       chainstream.deployed().then((instance) => {
         this.setState({
           chainstreamInstance: instance,
-          accounts: hardcodedAccounts,
+          accounts,
         })
       })
     })
@@ -117,13 +118,15 @@ class App extends Component {
   onTip = (e) => {
     // TODO: deduct funds
 
+    console.log()
     // add tip event
-
     this.state.chainstreamInstance.streamPrice().then((resp) => {
       console.log(resp);
     })
-    this.state.chainstreamInstance.sendTip(this.state.accounts[2],
-      {value: 1})
+    this.state.chainstreamInstance.sendTip(this.state.accounts[1],
+      {from: this.state.accounts[0], value: 1}).then(
+        res => console.log(res)
+    )
   };
 
   onFinishGame = (e) => {

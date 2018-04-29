@@ -21,7 +21,8 @@ contract('Chainstream', accounts => {
       .then(assert.fail)
       .catch(error => assert(error.message.includes('revert')));
 
-    instance.sendTip(STREAMER, {from: VIEWER, value: ethToWei(10)});
+    await instance.sendTip(STREAMER, {from: VIEWER, value: ethToWei(10)});
+    console.log();
   })
 
 })
