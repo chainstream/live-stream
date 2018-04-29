@@ -5,7 +5,7 @@ import FeedEvents from './FeedEvents'
 import {initialEvents} from './utils/fixtures'
 import ReactPlayer from 'react-player'
 
-import SimpleStorageContract from '../build/contracts/SimpleStorage.json'
+import ChainstreamContract from '../build/contracts/Chainstream.json'
 import getWeb3 from './utils/getWeb3'
 
 import './css/oswald.css'
@@ -47,8 +47,8 @@ class App extends Component {
      */
 
     const contract = require('truffle-contract')
-    const simpleStorage = contract(SimpleStorageContract)
-    simpleStorage.setProvider(this.state.web3.currentProvider)
+    const chainstream = contract(ChainstreamContract)
+    chainstream.setProvider(this.state.web3.currentProvider)
 
     // Declaring this for later so we can chain functions on SimpleStorage.
     var simpleStorageInstance
